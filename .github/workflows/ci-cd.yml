@@ -51,7 +51,6 @@ jobs:
         run: |
           echo 'Changed services: ${{ steps.filter.outputs.changes }}'
 
-
   test-ratings:
     name: Test Ratings Service
     needs: changes
@@ -76,7 +75,6 @@ jobs:
 
       - name: Check JavaScript syntax
         run: node --check ratings.js
-
 
   test-productpage:
     name: Test Productpage Service
@@ -106,7 +104,6 @@ jobs:
       - name: Run unit tests
         run: python -m unittest discover -s tests/unit
 
-
   test-details:
     name: Test Details Service
     needs: changes
@@ -133,8 +130,6 @@ jobs:
           find . -type f -name '*.rb' \
             -not -path './vendor/*' \
             -exec ruby -c {} \;
-
-
 
   test-reviews:
     name: Test Reviews Service
@@ -188,7 +183,6 @@ jobs:
             --error \
             details productpage ratings reviews
 
-
   secret-scan:
     name: Secret Scanning - Gitleaks
     runs-on: ubuntu-24.04
@@ -207,3 +201,26 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  dependency-scan:
+    name: Dependency Scanning - Trivy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Run Trivy dependency scan
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          format: table
