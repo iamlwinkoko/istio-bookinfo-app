@@ -12,28 +12,59 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-FROM python:3.13.3-slim
 
-WORKDIR /
+# Stage 1: Install application dependencies
+FROM python:3.13-slim-bookworm AS builder
+
+WORKDIR /build
 
 COPY requirements.txt ./
-RUN pip3 install -vvv --require-hashes --no-cache-dir -r requirements.txt
+
+RUN python -m pip install \
+    --require-hashes \
+    --no-cache-dir \
+    --prefix=/install \
+    -r requirements.txt
+
+
+# Stage 2: Run unit tests
+FROM python:3.13-slim-bookworm AS tester
+
+WORKDIR /opt/microservices
+
+COPY --from=builder /install /usr/local
 
 COPY test-requirements.txt ./
-RUN pip3 install --no-cache-dir --require-hashes -r test-requirements.txt
 
-COPY productpage.py /opt/microservices/
-COPY tests/unit/* /opt/microservices/
-COPY templates /opt/microservices/templates
-COPY static /opt/microservices/static
-COPY requirements.txt /opt/microservices/
+RUN python -m pip install \
+    --require-hashes \
+    --no-cache-dir \
+    -r test-requirements.txt
+
+COPY productpage.py ./
+COPY tests ./tests
+COPY templates ./templates
+COPY static ./static
+
+RUN python -m unittest discover -s tests/unit
+
+
+# Stage 3: Production runtime
+FROM python:3.13-slim-bookworm AS runtime
+
+WORKDIR /opt/microservices
+
+COPY --from=builder /install /usr/local
+
+COPY productpage.py ./
+COPY templates ./templates
+COPY static ./static
+COPY requirements.txt ./
 
 ARG flood_factor
 ENV FLOOD_FACTOR=${flood_factor:-0}
 
 EXPOSE 9080
-WORKDIR /opt/microservices
-RUN python -m unittest discover
 
 USER 1000
 
