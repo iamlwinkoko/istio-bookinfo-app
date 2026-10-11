@@ -225,7 +225,6 @@ jobs:
           exit-code: '1'
           format: table
 
-
   docker-build-scan:
     name: Docker Build & Scan - ${{ matrix.service }}
     needs:
@@ -275,6 +274,8 @@ jobs:
           push: false
           load: true
           tags: bookinfo-${{ matrix.service }}:ci
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
 
       - name: Scan Docker image with Trivy
         uses: aquasecurity/trivy-action@v0.36.0
