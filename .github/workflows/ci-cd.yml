@@ -105,3 +105,31 @@ jobs:
 
       - name: Run unit tests
         run: python -m unittest discover -s tests/unit
+
+
+  test-details:
+    name: Test Details Service
+    needs: changes
+    if: contains(fromJSON(needs.changes.outputs.services), 'details')
+    runs-on: ubuntu-24.04
+
+    defaults:
+      run:
+        working-directory: details
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: details
+
+      - name: Check Ruby syntax
+        run: |
+          find . -type f -name '*.rb' \
+            -not -path './vendor/*' \
+            -exec ruby -c {} \;
