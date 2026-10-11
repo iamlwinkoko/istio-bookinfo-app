@@ -133,3 +133,28 @@ jobs:
           find . -type f -name '*.rb' \
             -not -path './vendor/*' \
             -exec ruby -c {} \;
+
+
+  test-reviews:
+    name: Test Reviews Service
+    needs: changes
+    if: contains(fromJSON(needs.changes.outputs.services), 'reviews')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build and test Reviews
+        working-directory: reviews
+        run: gradle build --no-daemon
