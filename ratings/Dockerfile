@@ -12,22 +12,38 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# Build stage
+FROM node:24-bookworm-slim AS builder
+
+WORKDIR /opt/microservices
+
+COPY package.json ./
+RUN npm install --omit=dev
+
+COPY ratings.js ./
+
+# Runtime stage
 FROM node:24-bookworm-slim
 
-#hadolint ignore=DL3008
 RUN apt-get update \
-    && apt-get install curl ca-certificates --no-install-recommends -y \
+    && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends curl ca-certificates \
     && update-ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /usr/local/lib/node_modules/npm \
+              /usr/local/lib/node_modules/corepack \
+              /opt/yarn-v*
 
 ARG service_version
 ENV SERVICE_VERSION=${service_version:-v1}
 
-COPY package.json /opt/microservices/
-COPY ratings.js /opt/microservices/
 WORKDIR /opt/microservices
-RUN npm install
+
+COPY --from=builder /opt/microservices/node_modules ./node_modules
+COPY --from=builder /opt/microservices/ratings.js ./ratings.js
 
 EXPOSE 9080
+
 USER 1000
+
 CMD ["node", "/opt/microservices/ratings.js", "9080"]
