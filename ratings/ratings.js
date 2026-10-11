@@ -13,6 +13,7 @@
 //   limitations under the License.
 
 // CI/CD Test: Verify GitHub Actions change detection for ratings service
+// This file is used to verify that changes to the ratings service are detected by GitHub Actions
 
 var http = require('http')
 var dispatcher = require('httpdispatcher')
