@@ -13,6 +13,7 @@
 #   limitations under the License.
 
 
+
 # Stage 1: Install application dependencies
 FROM python:3.13-slim-bookworm AS builder
 
@@ -55,6 +56,11 @@ FROM python:3.13-slim-bookworm AS runtime
 WORKDIR /opt/microservices
 
 COPY --from=builder /install /usr/local
+
+# Remove packaging tools from the runtime image.
+# Keep this separate from the builder stage.
+RUN python -m pip uninstall -y setuptools wheel \
+    && python -m pip uninstall -y pip
 
 COPY productpage.py ./
 COPY templates ./templates
