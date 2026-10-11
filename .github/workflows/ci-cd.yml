@@ -187,3 +187,23 @@ jobs:
             --severity ERROR \
             --error \
             details productpage ratings reviews
+
+
+  secret-scan:
+    name: Secret Scanning - Gitleaks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
