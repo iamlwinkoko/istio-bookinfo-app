@@ -12,6 +12,8 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 
+// CI/CD Test: Verify GitHub Actions change detection for ratings service
+
 var http = require('http')
 var dispatcher = require('httpdispatcher')
 
