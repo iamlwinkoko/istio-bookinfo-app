@@ -50,3 +50,29 @@ jobs:
       - name: Display changed services
         run: |
           echo 'Changed services: ${{ steps.filter.outputs.changes }}'
+
+
+  test-ratings:
+    name: Test Ratings Service
+    needs: changes
+    if: contains(fromJSON(needs.changes.outputs.services), 'ratings')
+    runs-on: ubuntu-24.04
+
+    defaults:
+      run:
+        working-directory: ratings
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check JavaScript syntax
+        run: node --check ratings.js
