@@ -76,3 +76,32 @@ jobs:
 
       - name: Check JavaScript syntax
         run: node --check ratings.js
+
+
+  test-productpage:
+    name: Test Productpage Service
+    needs: changes
+    if: contains(fromJSON(needs.changes.outputs.services), 'productpage')
+    runs-on: ubuntu-24.04
+
+    defaults:
+      run:
+        working-directory: productpage
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install application dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install test dependencies
+        run: pip install -r test-requirements.txt
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests/unit
