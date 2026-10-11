@@ -162,3 +162,28 @@ jobs:
         working-directory: reviews
         run: gradle build --no-daemon
 
+  sast:
+    name: SAST - Semgrep
+    needs: changes
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep SAST
+        run: |
+          semgrep scan \
+            --config p/default \
+            --severity ERROR \
+            --error \
+            details productpage ratings reviews
