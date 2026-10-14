@@ -170,7 +170,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image
+      - name: Build Docker image (No Cache)
         uses: docker/build-push-action@v6
         with:
           context: ./${{ matrix.service }}
@@ -178,8 +178,8 @@ jobs:
           push: false
           load: true
           tags: bookinfo-${{ matrix.service }}:ci
-          cache-from: type=gha,scope=${{ matrix.service }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+          # cache-from: type=gha,scope=${{ matrix.service }}
+          # cache-to: type=gha,mode=max,scope=${{ matrix.service }}
 
       - name: Scan Docker image with Trivy
         uses: aquasecurity/trivy-action@v0.36.0
